@@ -27,9 +27,8 @@ extension String {
         return String(self[range])
     }
 }
-
-
-class ZReaderUtilites: NSObject {
+class ZParserUtilties:NSObject {
+    //   config
     class func parser(config:ZReaderConfig) -> Dictionary<NSAttributedStringKey, Any> {
         var dict = Dictionary<NSAttributedStringKey, Any>()
         dict[NSAttributedStringKey.font] = UIFont.systemFont(ofSize: config.fontSize)
@@ -42,6 +41,7 @@ class ZReaderUtilites: NSObject {
         return dict
     }
     
+    //     config bouns 获得frame
     class func parser(content:String, config:ZReaderConfig, bounds:CGRect) -> CTFrame {
         let attributeString = NSMutableAttributedString(string: content)
         let attributes = self.parser(config: config)
@@ -52,7 +52,57 @@ class ZReaderUtilites: NSObject {
         return frameR
     }
     
-//    拿到分章节
+    class func parser(point:CGPoint, selectRange: inout NSRange, frameR:CTFrame) ->CGRect {
+        let path = CTFrameGetPath(frameR)
+        let bounds = path.boundingBox
+        let linesO = CTFrameGetLines(frameR) as? Array<CTLine>
+        var rect = CGRect(x: 0, y: 0, width: 0, height: 0)
+        guard let lines = linesO else {
+            return rect
+        }
+        
+        let count = lines.count;
+        if count > 0 {
+            var originsArray = [CGPoint](repeating: CGPoint(x: 0, y: 0 ), count: count)
+            CTFrameGetLineOrigins(frameR, CFRangeMake(0, 0), &originsArray)
+            for i in 0..<count {
+                let linePoint = originsArray[i]
+                let line = lines[i]
+                var ascent:CGFloat = 0
+                var descent:CGFloat = 0
+                var lineGap:CGFloat = 0
+                let lineWidth = CTLineGetTypographicBounds(line, &ascent, &descent, &lineGap)
+                
+                let lineFrame = CGRect(x: linePoint.x, y: bounds.height - linePoint.y - ascent, width: CGFloat(lineWidth), height: ascent + descent + lineGap + ZReaderConfig.default.lineSpace)
+                if lineFrame.contains(point) {
+                    let stringRange = CTLineGetStringRange(line)
+                    let index = CTLineGetStringIndexForPosition(line, point)
+                    var start = CTLineGetOffsetForStringIndex(line, index, nil)
+                    var end:CGFloat = 0
+                    if index > stringRange.location + stringRange.length - 2 {
+                        end = start
+                        start = CTLineGetOffsetForStringIndex(line, index - 2, nil)
+                        selectRange.location = index - 2
+                    } else {
+                        selectRange.location = index
+                    }
+                    selectRange.length = 2
+                    rect = CGRect(x: originsArray[i].x + start, y: linePoint.y - descent, width: fabs(start - end), height: ascent + descent)
+                    break
+                }
+                
+                
+            }
+            
+        }
+        return rect
+    }
+    
+}
+
+class ZReaderUtilites: NSObject {
+    
+    //    拿到分章节
     class func separator(content:String, chapters:inout Array<ZChapterModel>) -> Void {
         chapters.removeAll()
         let pattern = "第[0-9一二三四五六七八九十百千]*[章回].*"
@@ -74,7 +124,7 @@ class ZReaderUtilites: NSObject {
                 let range = result.range
                 let local = range.location
                 let chapterModel = ZChapterModel()
-
+                
                 if offset == 0 {
                     chapterModel.title = "开始"
                     let length = local
@@ -99,7 +149,7 @@ class ZReaderUtilites: NSObject {
             print(error)
         }
     }
-//    处理content url
+    //    处理content url
     class func encode(url:URL?) -> String {
         guard let _ = url  else {
             return ""

@@ -46,7 +46,7 @@ extension ZChapterModel {
     func paginate(bounds:CGRect) -> Void {
         pageArray.removeAll()
         let attrStr = NSMutableAttributedString(string: content)
-        let attributes = ZReaderUtilites.parser(config: ZReaderConfig.default)
+        let attributes = ZParserUtilties.parser(config: ZReaderConfig.default)
         attrStr.setAttributes(attributes, range: NSRange(location: 0, length: attrStr.length) )
         let attrString = attrStr
         let frameSetter = CTFramesetterCreateWithAttributedString(attrString as CFAttributedString)

@@ -14,7 +14,7 @@ class ContentViewController: UIViewController {
     init(content:String ) {
         self.content = content
         super.init(nibName:  nil, bundle: nil)
-        let frameRef = ZReaderUtilites.parser(content: content, config: ZReaderConfig.default, bounds:ZReaderConfig.default.effectiveBounds() )
+        let frameRef = ZParserUtilties.parser(content: content, config: ZReaderConfig.default, bounds:ZReaderConfig.default.effectiveBounds() )
         
         readerView = ReaderView(frame: ZReaderConfig.default.effectiveFrame(), frameR: frameRef, content: content)
         
