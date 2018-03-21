@@ -90,14 +90,10 @@ class ZParserUtilties:NSObject {
                     rect = CGRect(x: originsArray[i].x + start, y: linePoint.y - descent, width: fabs(start - end), height: ascent + descent)
                     break
                 }
-                
-                
             }
-            
         }
         return rect
     }
-    
 }
 
 class ZReaderUtilites: NSObject {
@@ -161,7 +157,6 @@ class ZReaderUtilites: NSObject {
         if content == nil {
             content = try? String(contentsOf: url!, encoding: String.Encoding(rawValue: 0x80000631))
         }
-        
         return content!
     }
     
