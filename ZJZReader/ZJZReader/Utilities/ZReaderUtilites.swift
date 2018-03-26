@@ -94,6 +94,109 @@ class ZParserUtilties:NSObject {
         }
         return rect
     }
+    
+    
+    class func parser(point:CGPoint, frameR:CTFrame) -> CFIndex {
+        var index = -1
+        let path = CTFrameGetPath(frameR)
+        let bounds = path.boundingBox
+        let linesO = CTFrameGetLines(frameR) as? Array<CTLine>
+        guard let lines = linesO else {
+            return index
+        }
+        let count = lines.count
+        var origins = [CGPoint](repeating: CGPoint(x: 0, y: 0 ), count: count)
+        if count > 0 {
+            CTFrameGetLineOrigins(frameR, CFRangeMake(0, 0), &origins)
+            for i in 0..<count {
+               let linePoint = origins[i]
+               let line = lines[i]
+                
+                var ascent:CGFloat = 0
+                var descent:CGFloat = 0
+                var lineGap:CGFloat = 0
+                let lineWidth = CTLineGetTypographicBounds(line, &ascent, &descent, &lineGap)
+                
+                let lineFrame = CGRect(x: linePoint.x, y: bounds.height - linePoint.y - ascent, width: CGFloat(lineWidth), height: ascent + descent + lineGap + ZReaderConfig.default.lineSpace)
+                if lineFrame.contains(point) {
+                    index = CTLineGetStringIndexForPosition(line, point)
+                    break
+                }
+            }
+        }
+        return index
+    }
+    
+    
+    class func parser(point:CGPoint, range:inout NSRange, frameR:CTFrame, path:Array<CGRect>,  direction:ZPanDirection) -> Array<CGRect> {
+        var index = -1
+        let linesO = CTFrameGetLines(frameR) as? Array<CTLine>
+        guard let lines = linesO else {
+            return path
+        }
+        let count = lines.count
+        var origins = [CGPoint](repeating: CGPoint.zero, count: count)
+        index = parser(point: point, frameR: frameR)
+        if index == -1 {
+            return path
+        }
+        if direction == .right   {
+            
+           if !(index > range.location) {
+                range.length = range.location - index + range.length
+                range.location = index
+            } else {
+                 range.length = index - range.location
+            }
+        } else {
+            if (!(index > range.location + range.length)) {
+                range.length = range.location - index + range.length;
+                range.location = index;
+            }
+        }
+        var rectArray = [CGRect]()
+        if count > 0 {
+            CTFrameGetLineOrigins(frameR, CFRangeMake(0, 0), &origins)
+            for i in 0..<count {
+                let linePoint = origins[i]
+                let line = lines[i]
+                var ascent:CGFloat = 0
+                var descent:CGFloat = 0
+                var lineGap:CGFloat = 0
+                CTLineGetTypographicBounds(line, &ascent, &descent, &lineGap)
+                let stringRange = CTLineGetStringRange(line)
+                let drawRange = selected(selectedRange: NSMakeRange(range.location, range.length) , lineRange: NSMakeRange(stringRange.location, stringRange.length))
+                if drawRange.length > 0 {
+                    let start = CTLineGetOffsetForStringIndex(line, drawRange.location, nil)
+                    let end = CTLineGetOffsetForStringIndex(line, drawRange.location + drawRange.length, nil)
+                    let rect = CGRect(x: start, y: linePoint.y - descent, width: fabs(start - end), height: ascent + descent)
+                    if rect.height == 0 || rect.width == 0  {
+                        continue
+                    }
+                    rectArray.append(rect)
+                }
+            }
+        }
+        return rectArray
+    }
+    
+    class func selected(selectedRange:NSRange, lineRange:NSRange) -> NSRange {
+        var selectedRange = selectedRange
+        var lineRange = lineRange
+        var range = NSRange(location: NSNotFound, length: 0)
+        if lineRange.location > selectedRange.location {
+            let tmp = lineRange
+            lineRange = selectedRange
+            selectedRange = tmp
+        }
+        if selectedRange.location < lineRange.location + lineRange.length {
+            range.location = selectedRange.location
+            
+            range.length = min(selectedRange.location+selectedRange.length, lineRange.location+lineRange.length) - range.location
+        }
+        return range
+    }
+    
 }
 
 class ZReaderUtilites: NSObject {
@@ -130,7 +233,7 @@ class ZReaderUtilites: NSObject {
                     chapterModel.title = content.z_range(nsRange: lastRange)
                     let length = local - lastRange.location
                     chapterModel.content =  content.z_range(location: lastRange.location, length: length)
-                    print(chapterModel.title)
+                    
                 }
                 if offset == matchs.count - 1 {
                     chapterModel.title = content.z_range(location: local, length: range.length)
