@@ -27,6 +27,7 @@ extension String {
         return String(self[range])
     }
 }
+
 class ZParserUtilties:NSObject {
     //   config
     class func parser(config:ZReaderConfig) -> Dictionary<NSAttributedStringKey, Any> {
@@ -41,7 +42,7 @@ class ZParserUtilties:NSObject {
         return dict
     }
     
-    //     config bouns 获得frame
+    //     config bounds 获得frame
     class func parser(content:String, config:ZReaderConfig, bounds:CGRect) -> CTFrame {
         let attributeString = NSMutableAttributedString(string: content)
         let attributes = self.parser(config: config)
@@ -52,6 +53,7 @@ class ZParserUtilties:NSObject {
         return frameR
     }
     
+    //    给定一个长按的点 得到选中的rect
     class func parser(point:CGPoint, selectRange: inout NSRange, frameR:CTFrame) ->CGRect {
         let path = CTFrameGetPath(frameR)
         let bounds = path.boundingBox
@@ -72,7 +74,6 @@ class ZParserUtilties:NSObject {
                 var descent:CGFloat = 0
                 var lineGap:CGFloat = 0
                 let lineWidth = CTLineGetTypographicBounds(line, &ascent, &descent, &lineGap)
-                
                 let lineFrame = CGRect(x: linePoint.x, y: bounds.height - linePoint.y - ascent, width: CGFloat(lineWidth), height: ascent + descent + lineGap + ZReaderConfig.default.lineSpace)
                 if lineFrame.contains(point) {
                     let stringRange = CTLineGetStringRange(line)
@@ -95,7 +96,6 @@ class ZParserUtilties:NSObject {
         return rect
     }
     
-    
     class func parser(point:CGPoint, frameR:CTFrame) -> CFIndex {
         var index = -1
         let path = CTFrameGetPath(frameR)
@@ -109,14 +109,12 @@ class ZParserUtilties:NSObject {
         if count > 0 {
             CTFrameGetLineOrigins(frameR, CFRangeMake(0, 0), &origins)
             for i in 0..<count {
-               let linePoint = origins[i]
-               let line = lines[i]
-                
+                let linePoint = origins[i]
+                let line = lines[i]
                 var ascent:CGFloat = 0
                 var descent:CGFloat = 0
                 var lineGap:CGFloat = 0
                 let lineWidth = CTLineGetTypographicBounds(line, &ascent, &descent, &lineGap)
-                
                 let lineFrame = CGRect(x: linePoint.x, y: bounds.height - linePoint.y - ascent, width: CGFloat(lineWidth), height: ascent + descent + lineGap + ZReaderConfig.default.lineSpace)
                 if lineFrame.contains(point) {
                     index = CTLineGetStringIndexForPosition(line, point)
@@ -126,7 +124,6 @@ class ZParserUtilties:NSObject {
         }
         return index
     }
-    
     
     class func parser(point:CGPoint, range:inout NSRange, frameR:CTFrame, path:Array<CGRect>,  direction:ZPanDirection) -> Array<CGRect> {
         var index = -1
@@ -142,11 +139,11 @@ class ZParserUtilties:NSObject {
         }
         if direction == .right   {
             
-           if !(index > range.location) {
+            if !(index > range.location) {
                 range.length = range.location - index + range.length
                 range.location = index
             } else {
-                 range.length = index - range.location
+                range.length = index - range.location
             }
         } else {
             if (!(index > range.location + range.length)) {
@@ -233,8 +230,8 @@ class ZReaderUtilites: NSObject {
                     chapterModel.title = content.z_range(nsRange: lastRange)
                     let length = local - lastRange.location
                     chapterModel.content =  content.z_range(location: lastRange.location, length: length)
-                    
                 }
+                
                 if offset == matchs.count - 1 {
                     chapterModel.title = content.z_range(location: local, length: range.length)
                     chapterModel.content = content.z_range(location: local, length: content.count - local - 1)

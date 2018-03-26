@@ -20,7 +20,6 @@ class ReaderView: UIView {
     var frameR:CTFrame
     var content = ""
     var frameArray = [CGRect]()
-    
 
     var pan:UIPanGestureRecognizer?
     var longPress:UILongPressGestureRecognizer?
@@ -29,6 +28,11 @@ class ReaderView: UIView {
     var leftRect = CGRect.zero
     var rightRect = CGRect.zero
     var selectRange = NSMakeRange(0, 0)
+    
+    var magnifyingView:ZMagnifyingView?
+    
+    
+    
     //    初始化
     //    frmeRef为绘制需要展示的frameRef
     //    conten为内容
@@ -41,6 +45,7 @@ class ReaderView: UIView {
         addLongPress()
         addPan()
         addTap()
+        
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -58,6 +63,7 @@ class ReaderView: UIView {
         //       注意默认值为opengl坐标 需要翻转
         ctx?.translateBy(x: 0, y: self.bounds.size.height)
         ctx?.scaleBy(x: 1.0, y: -1.0)
+        
         var leftDot = CGRect.zero
         var rightDot =  CGRect.zero
         draw(frameArray: frameArray, leftDot: &leftDot, rightDot: &rightDot)
@@ -81,13 +87,32 @@ private extension ReaderView {
         
     }
     
-//
+//     添加点击手势
     func addTap() -> Void {
         tap = UITapGestureRecognizer(target: self, action: #selector(tap(tap:)))
         addGestureRecognizer(tap!)
     }
     
+//    show放大镜
+    func showMagnifyingView() -> Void {
+        guard let view = magnifyingView  else {
+            magnifyingView = ZMagnifyingView(readerView: self)
+            magnifyingView?.removeFromSuperview()
+            addSubview(magnifyingView!)
+            return
+        }
+        view.removeFromSuperview()
+        addSubview(magnifyingView!)
+    }
     
+//    隐藏放大镜
+    func hideMagnifyingView() -> Void {
+         magnifyingView?.removeFromSuperview()
+         magnifyingView = nil
+    }
+    
+    
+//    绘制选中的区域
     func draw(frameArray:[CGRect], leftDot:inout CGRect, rightDot:inout CGRect) -> Void {
         
         if frameArray.count == 0 {
@@ -108,38 +133,52 @@ private extension ReaderView {
         draw(path: path, color: UIColor.green)
     }
     
-    
+//    绘制右边跟左边
     func draw(leftRect:CGRect, rightRect:CGRect) -> Void {
         if CGRect.zero.equalTo(leftRect) || CGRect.zero.equalTo(rightRect) {
             return
         }
         
         let path = CGMutablePath.init()
-        path.addRect(CGRect(x: leftRect.minX - 2, y: leftRect.minY, width: 2, height:leftRect.height))
-        path.addRect(CGRect(x: rightRect.maxX, y: rightRect.minY, width: 2, height: rightRect.height))
+        path.addRect(CGRect(x: leftRect.minX - 2,
+                            y: leftRect.minY,
+                            width: 2,
+                            height:leftRect.height))
+        path.addRect(CGRect(x: rightRect.maxX,
+                            y: rightRect.minY,
+                            width: 2,
+                            height: rightRect.height))
         draw(path: path, color: UIColor.black)
 
         let ctx = UIGraphicsGetCurrentContext()
         let dotSize:CGFloat = 15
         
-        self.leftRect = CGRect(x: leftRect.minX - dotSize / 2 - 10, y:frame.size.height - (leftRect.maxY - dotSize / 2 - 10.0) - (dotSize + 20.0), width: dotSize + 20.0, height: dotSize + 20.0)
-        self.rightRect = CGRect(x: rightRect.maxX - dotSize / 2  - 10, y: frame.size.height - (rightRect.minY - dotSize / 2 - 10) - dotSize - 20, width: dotSize + 20, height: dotSize + 20)
+        self.leftRect = CGRect(x: leftRect.minX - dotSize / 2 - 10,
+                               y:frame.size.height - (leftRect.maxY - dotSize / 2 - 10.0) - (dotSize + 20.0),
+                               width: dotSize + 20.0,
+                               height: dotSize + 20.0)
+        self.rightRect = CGRect(x: rightRect.maxX - dotSize / 2  - 10,
+                                y: frame.size.height - (rightRect.minY - dotSize / 2 - 10) - dotSize - 20,
+                                width: dotSize + 20,
+                                height: dotSize + 20)
         
-        ctx?.draw((UIImage(named: "r_drag-dot")?.cgImage)!, in: CGRect(x: leftRect.minX - dotSize / 2 , y: leftRect.maxY - dotSize / 2, width: dotSize, height: dotSize))
-        ctx?.draw((UIImage(named: "r_drag-dot")?.cgImage)!, in: CGRect(x: rightRect.maxX - dotSize / 2 , y: rightRect.minY - dotSize / 2, width: dotSize, height: dotSize))
+        ctx?.draw((UIImage(named: "r_drag-dot")?.cgImage)!, in: CGRect(x: leftRect.minX - dotSize / 2 ,
+                                                                       y: leftRect.maxY - dotSize / 2,
+                                                                       width: dotSize,
+                                                                       height: dotSize))
+        
+        ctx?.draw((UIImage(named: "r_drag-dot")?.cgImage)!, in: CGRect(x: rightRect.maxX - dotSize / 2 ,
+                                                                       y: rightRect.minY - dotSize / 2,
+                                                                       width: dotSize,
+                                                                       height: dotSize))
     }
-    
+//    绘制一条贝塞尔曲线
     func draw(path:CGPath, color:UIColor) -> Void {
         let ctx = UIGraphicsGetCurrentContext()
         ctx?.addPath(path)
         color.setFill()
         ctx?.fillPath()
     }
-    
-    
-    
-    
-    
     
 //     选中范围移动的方向
     func direction(transportPoint:CGPoint, locationPoint:CGPoint, leftRect:CGRect, rightRect:CGRect) -> ZPanDirection {
@@ -163,31 +202,33 @@ private extension ReaderView {
         return direction
     }
     
-    
-    
-    
     @objc func pan(pan:UIPanGestureRecognizer) -> Void {
         let point = pan.location(in: self)
         let transportPoint = pan.translation(in: self)
+        hideMagnifyingView()
         if pan.state == .began || pan.state == .changed {
-           
+            showMagnifyingView()
+            magnifyingView?.touchPoint = point
             let dir = direction(transportPoint: transportPoint, locationPoint: point, leftRect: self.leftRect, rightRect: self.rightRect)
             let paths = ZParserUtilties.parser(point: point, range: &selectRange, frameR: frameR, path: frameArray, direction: dir)
             frameArray = paths
             setNeedsDisplay()
+        }
+        
+        if pan.state == .ended {
+            hideMagnifyingView()
         }
     }
     
     @objc func longPress(press:UILongPressGestureRecognizer) -> Void {
         let location = press.location(in: self)
         if press.state == .began || press.state == .changed {
-            var range = NSMakeRange(0, 0)
+//            var range = NSMakeRange(0, 0)
             let rect = ZParserUtilties.parser(point: location, selectRange: &selectRange, frameR: frameR)
             if !rect.equalTo(CGRect.zero) {
                 frameArray.removeAll()
                 frameArray.append(rect)
                 setNeedsDisplay()
-                
             }
             pan?.isEnabled = true
         }
