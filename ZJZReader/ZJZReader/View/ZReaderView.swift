@@ -13,8 +13,6 @@ enum ZPanDirection {
     case left, right
 }
 
-
-
 class ReaderView: UIView {
     
     var frameR:CTFrame
@@ -125,7 +123,10 @@ private extension ReaderView {
         if becomeFirstResponder() {
             let copyItem = UIMenuItem(title: "复制", action: #selector(copy(item:)))
             menuController.menuItems = [copyItem]
-            menuController.setTargetRect(CGRect(x: menuRect.midX - menuRect.width, y: frame.size.height - menuRect.midY - 10, width: menuRect.width, height: menuRect.height) , in: self)
+            menuController.setTargetRect(CGRect(x: menuRect.midX - menuRect.width,
+                                                y: frame.size.height - menuRect.midY - 10,
+                                                width: menuRect.width,
+                                                height: menuRect.height) , in: self)
             menuController.setMenuVisible(true, animated: true)
         }
     }
@@ -230,7 +231,7 @@ private extension ReaderView {
         let str = content.z_range(nsRange: selectRange)
         let pastedBoard = UIPasteboard.general
         pastedBoard.string = str
-
+        
         UIAlertView(title: "", message: str, delegate: nil, cancelButtonTitle: "我知道了").show()
     }
     //    pan手势
@@ -274,18 +275,13 @@ private extension ReaderView {
                 showMenu()
             }
         }
-        
-        
     }
     //    点击手势
     @objc func tap(tap:UITapGestureRecognizer) -> Void {
         frameArray.removeAll()
         setNeedsDisplay()
         pan?.isEnabled = false
+        hidenMenu()
     }
 }
-
-
-
-
 

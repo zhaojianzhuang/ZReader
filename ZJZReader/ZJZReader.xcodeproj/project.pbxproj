@@ -20,6 +20,7 @@
 		22809F82205FA899007A2377 /* ZReaderConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22809F78205FA899007A2377 /* ZReaderConfig.swift */; };
 		22809F83205FA899007A2377 /* mdjyml.txt in Resources */ = {isa = PBXBuildFile; fileRef = 22809F7A205FA899007A2377 /* mdjyml.txt */; };
 		2286BB1E20689579005357CF /* ZMagnifyingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2286BB1D20689579005357CF /* ZMagnifyingView.swift */; };
+		22FF6E912068E88800F62B89 /* ZPrsentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22FF6E902068E88800F62B89 /* ZPrsentViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		22809F78205FA899007A2377 /* ZReaderConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZReaderConfig.swift; sourceTree = "<group>"; };
 		22809F7A205FA899007A2377 /* mdjyml.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdjyml.txt; sourceTree = "<group>"; };
 		2286BB1D20689579005357CF /* ZMagnifyingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZMagnifyingView.swift; sourceTree = "<group>"; };
+		22FF6E902068E88800F62B89 /* ZPrsentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZPrsentViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +91,7 @@
 			children = (
 				22809F6D205FA899007A2377 /* ContentViewController.swift */,
 				22809F6E205FA899007A2377 /* ViewController.swift */,
+				22FF6E902068E88800F62B89 /* ZPrsentViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -212,6 +215,7 @@
 				22809F7E205FA899007A2377 /* ZReaderUtilites.swift in Sources */,
 				22809F82205FA899007A2377 /* ZReaderConfig.swift in Sources */,
 				22809F7C205FA899007A2377 /* ViewController.swift in Sources */,
+				22FF6E912068E88800F62B89 /* ZPrsentViewController.swift in Sources */,
 				22809F81205FA899007A2377 /* ZChapterModel.swift in Sources */,
 				2286BB1E20689579005357CF /* ZMagnifyingView.swift in Sources */,
 				22809F7D205FA899007A2377 /* ZReaderView.swift in Sources */,
