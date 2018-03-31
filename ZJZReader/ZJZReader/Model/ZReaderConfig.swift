@@ -40,7 +40,5 @@ class ZReaderConfig: NSObject {
     func effectiveBounds() -> CGRect {
         return CGRect(x: 0, y: 0, width: SCREEN_WIDTH - leftMargin - rightMargin, height: SCREEN_HEIGHT - topMargin - bottomMargin)
     }
-    
-    
 }
 

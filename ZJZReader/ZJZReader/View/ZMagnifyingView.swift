@@ -10,7 +10,9 @@ import UIKit
 
 //放大镜view
 class ZMagnifyingView: UIView {
-    private let readerView:ReaderView
+//    放大的view
+    private let readerView:UIView
+//    当前要放大的点
     private var _touchPoint:CGPoint = CGPoint.zero
     
     var touchPoint:CGPoint {
@@ -26,14 +28,13 @@ class ZMagnifyingView: UIView {
         }
     }
     
-    init(readerView:ReaderView) {
-        self.readerView = readerView
+    init(renderView:UIView) {
+        self.readerView = renderView
         super.init(frame: CGRect(x: 0, y: 0, width: 80, height: 80))
         layer.borderColor = UIColor.lightGray.cgColor
         layer.cornerRadius = 40
         layer.masksToBounds = true
         self.backgroundColor = ZReaderConfig.default.themeColor
-        
     }
     
     required init?(coder aDecoder: NSCoder) {

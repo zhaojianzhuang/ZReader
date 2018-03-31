@@ -13,27 +13,43 @@ enum ZPanDirection {
     case left, right
 }
 
+@objc protocol ReaderViewDelegate {
+    @objc optional
+    func longPress(longPress:UILongPressGestureRecognizer, view:UIView) -> Void
+    @objc optional
+    func tap(tap:UITapGestureRecognizer, view:UIView) -> Void
+    @objc optional
+    func pan(pan:UIPanGestureRecognizer, view:UIView) -> Void
+}
+
+
 class ReaderView: UIView {
+//    绘制的frameR
+    private var frameR:CTFrame
+//    展示的内容
+    private var content = ""
+//    选中的frame的数组
+    private var frameArray = [CGRect]()
+//    手势
+    private var pan:UIPanGestureRecognizer?
+    private var longPress:UILongPressGestureRecognizer?
+    private var tap:UITapGestureRecognizer?
+//    左边的rect
+    private var leftRect = CGRect.zero
+//    右边的rect
+    private var rightRect = CGRect.zero
+//    选中的range
+    private var selectRange = NSMakeRange(0, 0)
     
-    var frameR:CTFrame
-    var content = ""
-    var frameArray = [CGRect]()
-    
-    var pan:UIPanGestureRecognizer?
-    var longPress:UILongPressGestureRecognizer?
-    var tap:UITapGestureRecognizer?
-    
-    var leftRect = CGRect.zero
-    var rightRect = CGRect.zero
-    var selectRange = NSMakeRange(0, 0)
-    
-    var menuRect = CGRect.zero
-    
-    let menuController = UIMenuController.shared
-    
-    //   放大镜view
-    var magnifyingView:ZMagnifyingView?
-    
+//    menu应该显示的位置
+    private var _menuRect = CGRect.zero
+    var menuRect:CGRect {
+        get {
+            return _menuRect
+        }
+    }
+//    代理
+    var delegate:ReaderViewDelegate?
     
     //    初始化
     //    frmeRef为绘制需要展示的frameRef
@@ -41,13 +57,11 @@ class ReaderView: UIView {
     init(frame:CGRect, frameR:CTFrame, content:String) {
         self.frameR = frameR
         self.content = content
-        
         super.init(frame: frame)
         self.backgroundColor = ZReaderConfig.default.themeColor
         addLongPress()
         addPan()
         addTap()
-        
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -79,6 +93,37 @@ class ReaderView: UIView {
     }
 }
 
+//MARK:- interface
+extension ReaderView {
+    //    绘制pan手势经过的选中的颜色
+    func drawSelected(transportPoint:CGPoint, locationPoint:CGPoint) -> Void {
+        let dir = direction(transportPoint: transportPoint, locationPoint: locationPoint, leftRect: self.leftRect, rightRect: self.rightRect)
+        let paths = ZParserUtilties.parser(point: locationPoint, range: &selectRange, frameR: frameR, path: frameArray, direction: dir)
+        frameArray = paths
+        setNeedsDisplay()
+    }
+    //    清除所有选中的颜色
+    func clear() -> Void {
+        frameArray.removeAll()
+        setNeedsDisplay()
+        pan?.isEnabled = false
+    }
+    //    选中的文字
+    func selected() -> String {
+        return content.z_range(nsRange: selectRange)
+    }
+    //    绘制长按点选中的颜色
+    func drawSelected(longPressPoint:CGPoint) -> Void {
+        let rect = ZParserUtilties.parser(point: longPressPoint, selectRange: &selectRange, frameR: frameR)
+        if !rect.equalTo(CGRect.zero) {
+            frameArray.removeAll()
+            frameArray.append(rect)
+            setNeedsDisplay()
+        }
+        pan?.isEnabled = true
+    }
+}
+
 private extension ReaderView {
     //    长按的手势添加
     func addLongPress() -> Void {
@@ -100,41 +145,6 @@ private extension ReaderView {
         addGestureRecognizer(tap!)
     }
     
-    //    show放大镜
-    func showMagnifyingView() -> Void {
-        guard let view = magnifyingView  else {
-            magnifyingView = ZMagnifyingView(readerView: self)
-            magnifyingView?.removeFromSuperview()
-            addSubview(magnifyingView!)
-            return
-        }
-        view.removeFromSuperview()
-        addSubview(magnifyingView!)
-    }
-    
-    //    隐藏放大镜
-    func hideMagnifyingView() -> Void {
-        magnifyingView?.removeFromSuperview()
-        magnifyingView = nil
-    }
-    
-    //    menu标签显示
-    func showMenu() -> Void {
-        if becomeFirstResponder() {
-            let copyItem = UIMenuItem(title: "复制", action: #selector(copy(item:)))
-            menuController.menuItems = [copyItem]
-            menuController.setTargetRect(CGRect(x: menuRect.midX - menuRect.width,
-                                                y: frame.size.height - menuRect.midY - 10,
-                                                width: menuRect.width,
-                                                height: menuRect.height) , in: self)
-            menuController.setMenuVisible(true, animated: true)
-        }
-    }
-    
-    //     menu隐藏
-    func hidenMenu() -> Void {
-        UIMenuController.shared.setMenuVisible(false, animated: true)
-    }
     //    绘制选中的区域
     func draw(frameArray:[CGRect], leftDot:inout CGRect, rightDot:inout CGRect) -> Void {
         
@@ -148,7 +158,7 @@ private extension ReaderView {
             path.addRect(frame)
             if offset == 0 {
                 leftDot = frame
-                menuRect = frame
+                _menuRect = frame
             }
             if offset == frameArray.count - 1 {
                 rightDot = frame
@@ -225,63 +235,21 @@ private extension ReaderView {
         }
         return direction
     }
-    //    复制
-    @objc func copy(item:UIMenuItem) -> Void {
-        hidenMenu()
-        let str = content.z_range(nsRange: selectRange)
-        let pastedBoard = UIPasteboard.general
-        pastedBoard.string = str
-        
-        UIAlertView(title: "", message: str, delegate: nil, cancelButtonTitle: "我知道了").show()
-    }
+    
+    
     //    pan手势
     @objc func pan(pan:UIPanGestureRecognizer) -> Void {
-        let point = pan.location(in: self)
-        let transportPoint = pan.translation(in: self)
-        hideMagnifyingView()
-        if pan.state == .began || pan.state == .changed {
-            hidenMenu()
-            showMagnifyingView()
-            magnifyingView?.touchPoint = point
-            let dir = direction(transportPoint: transportPoint, locationPoint: point, leftRect: self.leftRect, rightRect: self.rightRect)
-            let paths = ZParserUtilties.parser(point: point, range: &selectRange, frameR: frameR, path: frameArray, direction: dir)
-            frameArray = paths
-            setNeedsDisplay()
-        }
-        
-        if pan.state == .ended {
-            hideMagnifyingView()
-            if !menuRect.equalTo(CGRect.zero) {
-                showMenu()
-            }
-        }
+        delegate?.pan?(pan: pan, view: self)
     }
+    
     //    长按手势
     @objc func longPress(press:UILongPressGestureRecognizer) -> Void {
-        let location = press.location(in: self)
-        if press.state == .began || press.state == .changed {
-            //            var range = NSMakeRange(0, 0)
-            let rect = ZParserUtilties.parser(point: location, selectRange: &selectRange, frameR: frameR)
-            if !rect.equalTo(CGRect.zero) {
-                frameArray.removeAll()
-                frameArray.append(rect)
-                setNeedsDisplay()
-            }
-            pan?.isEnabled = true
-        }
-        
-        if press.state == .ended {
-            if !menuRect.equalTo(CGRect.zero) {
-                showMenu()
-            }
-        }
+        delegate?.longPress?(longPress: press, view: self)
     }
+    
     //    点击手势
     @objc func tap(tap:UITapGestureRecognizer) -> Void {
-        frameArray.removeAll()
-        setNeedsDisplay()
-        pan?.isEnabled = false
-        hidenMenu()
+        delegate?.tap?(tap: tap, view: self)
     }
 }
 
