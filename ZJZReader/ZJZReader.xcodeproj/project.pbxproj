@@ -18,9 +18,10 @@
 		22809F80205FA899007A2377 /* ZReaderModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22809F76205FA899007A2377 /* ZReaderModel.swift */; };
 		22809F81205FA899007A2377 /* ZChapterModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22809F77205FA899007A2377 /* ZChapterModel.swift */; };
 		22809F82205FA899007A2377 /* ZReaderConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22809F78205FA899007A2377 /* ZReaderConfig.swift */; };
-		22809F83205FA899007A2377 /* mdjyml.txt in Resources */ = {isa = PBXBuildFile; fileRef = 22809F7A205FA899007A2377 /* mdjyml.txt */; };
 		2286BB1E20689579005357CF /* ZMagnifyingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2286BB1D20689579005357CF /* ZMagnifyingView.swift */; };
-		22FF6E912068E88800F62B89 /* ZPrsentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22FF6E902068E88800F62B89 /* ZPrsentViewController.swift */; };
+		22A9924B2071C58D0054DC8E /* PresentBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22A9924A2071C58D0054DC8E /* PresentBaseViewController.swift */; };
+		22A9924F2071C8BB0054DC8E /* ChapterListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22A9924E2071C8BB0054DC8E /* ChapterListViewController.swift */; };
+		22A992512071D4C60054DC8E /* mdjyml.txt in Resources */ = {isa = PBXBuildFile; fileRef = 22A992502071D4C60054DC8E /* mdjyml.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,9 +38,10 @@
 		22809F76205FA899007A2377 /* ZReaderModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZReaderModel.swift; sourceTree = "<group>"; };
 		22809F77205FA899007A2377 /* ZChapterModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZChapterModel.swift; sourceTree = "<group>"; };
 		22809F78205FA899007A2377 /* ZReaderConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZReaderConfig.swift; sourceTree = "<group>"; };
-		22809F7A205FA899007A2377 /* mdjyml.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdjyml.txt; sourceTree = "<group>"; };
 		2286BB1D20689579005357CF /* ZMagnifyingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZMagnifyingView.swift; sourceTree = "<group>"; };
-		22FF6E902068E88800F62B89 /* ZPrsentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZPrsentViewController.swift; sourceTree = "<group>"; };
+		22A9924A2071C58D0054DC8E /* PresentBaseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentBaseViewController.swift; sourceTree = "<group>"; };
+		22A9924E2071C8BB0054DC8E /* ChapterListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChapterListViewController.swift; sourceTree = "<group>"; };
+		22A992502071D4C60054DC8E /* mdjyml.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdjyml.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,7 +93,8 @@
 			children = (
 				22809F6D205FA899007A2377 /* ContentViewController.swift */,
 				22809F6E205FA899007A2377 /* ViewController.swift */,
-				22FF6E902068E88800F62B89 /* ZPrsentViewController.swift */,
+				22A9924A2071C58D0054DC8E /* PresentBaseViewController.swift */,
+				22A9924E2071C8BB0054DC8E /* ChapterListViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -134,7 +137,7 @@
 		22809F79205FA899007A2377 /* Resource */ = {
 			isa = PBXGroup;
 			children = (
-				22809F7A205FA899007A2377 /* mdjyml.txt */,
+				22A992502071D4C60054DC8E /* mdjyml.txt */,
 			);
 			path = Resource;
 			sourceTree = "<group>";
@@ -199,7 +202,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				227517F6205B672300AF9FA7 /* LaunchScreen.storyboard in Resources */,
-				22809F83205FA899007A2377 /* mdjyml.txt in Resources */,
+				22A992512071D4C60054DC8E /* mdjyml.txt in Resources */,
 				227517F3205B672300AF9FA7 /* Assets.xcassets in Resources */,
 				227517F1205B672300AF9FA7 /* Main.storyboard in Resources */,
 			);
@@ -212,10 +215,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				22A9924F2071C8BB0054DC8E /* ChapterListViewController.swift in Sources */,
 				22809F7E205FA899007A2377 /* ZReaderUtilites.swift in Sources */,
+				22A9924B2071C58D0054DC8E /* PresentBaseViewController.swift in Sources */,
 				22809F82205FA899007A2377 /* ZReaderConfig.swift in Sources */,
 				22809F7C205FA899007A2377 /* ViewController.swift in Sources */,
-				22FF6E912068E88800F62B89 /* ZPrsentViewController.swift in Sources */,
 				22809F81205FA899007A2377 /* ZChapterModel.swift in Sources */,
 				2286BB1E20689579005357CF /* ZMagnifyingView.swift in Sources */,
 				22809F7D205FA899007A2377 /* ZReaderView.swift in Sources */,

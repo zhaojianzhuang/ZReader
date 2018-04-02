@@ -7,9 +7,17 @@
 //
 
 import UIKit
+@objc protocol ContentViewControllerDelegate {
+    @objc optional
+    func tap(viewController:ContentViewController, view:UIView) -> Void
+}
+
+
 
 class ContentViewController: UIViewController {
-//    menu
+//    代理
+    var delegate:ContentViewControllerDelegate?
+    //    menu
     let menuController = UIMenuController.shared
     //    展示文字的view
     var readerView:ReaderView
@@ -53,7 +61,7 @@ fileprivate extension ContentViewController {
         readerView.addSubview(view)
     }
     
-//     show放大镜 touchpoint
+    //     show放大镜 touchpoint
     func showMagnifyingView(touchPoint:CGPoint) -> Void {
         showMagnifyingView()
         magnifyingView?.touchPoint = touchPoint
@@ -97,7 +105,8 @@ fileprivate extension ContentViewController {
 
 extension ContentViewController:ReaderViewDelegate{
     func tap(tap: UITapGestureRecognizer, view: UIView) {
-       readerView.clear()
+        readerView.clear()
+        delegate?.tap?(viewController: self, view: view)
     }
     
     func pan(pan: UIPanGestureRecognizer, view: UIView) {

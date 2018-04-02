@@ -8,12 +8,13 @@
 
 import UIKit
 
-class ZPrsentViewController: UIViewController {
+class PresentBaseViewController: UIViewController {
     fileprivate let sponsorVC:UIViewController
     fileprivate let originFrame:CGRect
     fileprivate let finallFrame:CGRect
     fileprivate var backView:UIView?
     fileprivate var navController:UINavigationController?
+    
     init(sponsorVC:UIViewController, originFrame:CGRect, finallFrame:CGRect) {
         self.sponsorVC = sponsorVC
         self.originFrame = originFrame
@@ -34,10 +35,11 @@ class ZPrsentViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        edgesForExtendedLayout = .all
         
     }
 }
-private extension ZPrsentViewController {
+private extension PresentBaseViewController {
     
     func navControllerInit() -> Void {
         navController = UINavigationController(rootViewController: self)
@@ -48,20 +50,21 @@ private extension ZPrsentViewController {
     
     func backViewInit() -> Void {
         backView = UIView(frame: UIScreen.main.bounds)
-        backView?.backgroundColor = UIColor.red
+        backView?.backgroundColor = UIColor.init(red: 0, green: 0, blue: 0, alpha: 0.4)
         let tap = UITapGestureRecognizer(target: self, action: #selector(tap(tap:)))
         backView?.addGestureRecognizer(tap)
     }
     
-   @objc func tap(tap:UITapGestureRecognizer) -> Void {
+    @objc func tap(tap:UITapGestureRecognizer) -> Void {
         hideen()
+        
     }
     
 }
 
 
-extension ZPrsentViewController {
-    
+extension PresentBaseViewController {
+    //    隐藏
     func hideen() -> Void {
         UIView.animate(withDuration: 0.2, animations: {
             self.navigationController?.view.frame = self.originFrame
@@ -72,20 +75,21 @@ extension ZPrsentViewController {
             self.navController?.removeFromParentViewController()
         }
     }
-    
+    //    出现
     func show() -> Void {
         sponsorVC.navigationController?.view.addSubview(backView!)
         sponsorVC.navigationController?.addChildViewController(navController!)
-        sponsorVC.navigationController?.view.addSubview(view)
+        sponsorVC.navigationController?.view.addSubview(navController!.view)
         backView?.isHidden = false
         UIView.animate(withDuration: 0.2, animations: {
-            self.sponsorVC.view.frame = self.finallFrame
+            self.navController?.view.frame = self.finallFrame
         }) { (completion) in
             
         }
         
     }
 }
+
 
 
 

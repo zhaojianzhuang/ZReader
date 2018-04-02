@@ -205,7 +205,8 @@ class ZReaderUtilites: NSObject {
         
         do {
             let regular =  try NSRegularExpression(pattern: pattern, options: NSRegularExpression.Options.caseInsensitive)
-            let matchs = regular.matches(in: content, options: NSRegularExpression.MatchingOptions.reportCompletion, range: NSRange(location: 0, length: content.count))
+//            let contentLength = (content as NSString).length
+            let matchs = regular.matches(in: content, options: NSRegularExpression.MatchingOptions.reportCompletion, range: NSRange(location: 0, length: content.unicodeScalars.count))
             
             var lastRange = NSMakeRange(0, 0)
             
@@ -215,8 +216,10 @@ class ZReaderUtilites: NSObject {
                 chapters.append(chapterModel)
                 return
             }
+            print(matchs.count)
             
             for (offset, result) in matchs.enumerated() {
+                
                 let range = result.range
                 let local = range.location
                 let chapterModel = ZChapterModel()
@@ -234,7 +237,7 @@ class ZReaderUtilites: NSObject {
                 
                 if offset == matchs.count - 1 {
                     chapterModel.title = content.z_range(location: local, length: range.length)
-                    chapterModel.content = content.z_range(location: local, length: content.count - local - 1)
+                    chapterModel.content = content.z_range(location: local, length: content.unicodeScalars.count - local - 1)
                 }
                 
                 chapters.append(chapterModel)
