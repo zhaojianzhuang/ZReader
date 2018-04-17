@@ -8,8 +8,13 @@
 
 import UIKit
 
+@objc protocol ChapterListViewControllerDelegate {
+    @objc optional func readerList(readerModel:ZReadModel, didTap indexPath:IndexPath) -> Void
+}
+
+
 class ChapterListViewController: PresentBaseViewController {
-    
+    var delegate:ChapterListViewControllerDelegate?
     
     let readModel:ZReadModel
     let tableView_Identify = "ChapterListViewControllerId"
@@ -38,20 +43,41 @@ private extension ChapterListViewController {
         view.addSubview(tableView)
         tableView.delegate = self
         tableView.dataSource = self
+        
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: tableView_Identify)
     }
 }
 
+
 extension ChapterListViewController:UITableViewDelegate, UITableViewDataSource {
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: tableView_Identify, for: indexPath)
         let chapterModel = readModel.chapter(chapter: indexPath.row)
         cell.textLabel?.text = chapterModel?.title
+        
+        if indexPath.row == readModel.currentPage.chapter {
+            cell.backgroundColor = UIColor.red
+//            cell.accessoryType = UITableViewCellAccessoryType.checkmark
+        } else {
+//            cell.accessoryType = UITableViewCellAccessoryType.none
+            cell.backgroundColor = UIColor.white
+        }
+        
         return cell
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return readModel.chapterCount
     }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.hideen()
+        
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2) {
+            self.delegate?.readerList?(readerModel: self.readModel, didTap: indexPath)
+        }
+    }
 }
+
 

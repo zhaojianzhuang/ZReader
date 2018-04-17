@@ -78,7 +78,20 @@ extension ViewController:UIPageViewControllerDelegate, UIPageViewControllerDataS
     
     func tap(viewController:ContentViewController, view:UIView) -> Void {
         let vc = ChapterListViewController(readModel: model , sponsorVC: self)
+        vc.delegate = self
         vc.show()
     }
 }
+
+extension ViewController:ChapterListViewControllerDelegate {
+    func readerList(readerModel: ZReadModel, didTap indexPath: IndexPath) {
+        let parameter = PageParameter(chapter: indexPath.row, page: 0)
+        model.currentPage.set(parameter: parameter)
+        let vc = readView(parameter: model.currentPage)
+        guard let controller = vc else {  return  }
+        
+        pageController.setViewControllers([controller], direction: UIPageViewControllerNavigationDirection.forward, animated: true, completion: nil)
+    }
+}
+
 
